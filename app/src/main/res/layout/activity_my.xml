@@ -1,0 +1,44 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#f0f0f0">
+
+    <EditText
+        android:layout_width="220dp"
+        android:layout_height="50dp"
+        android:id="@+id/et"
+        android:hint="NUMBER HERE"
+        android:textSize = "24sp"
+        android:layout_marginTop="80dp"
+        android:layout_marginLeft="30dp"
+        android:paddingRight="35dp"
+        android:inputType="number" />
+
+    <Button
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:id="@+id/cancel"
+        android:layout_alignRight="@id/et"
+        android:layout_marginTop="95dp"
+        android:layout_marginRight="5dp"
+        android:background="@drawable/cancel"/>
+
+    <Button
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:id="@+id/search"
+        android:layout_marginTop="80dp"
+        android:layout_toRightOf="@id/et"
+        android:layout_marginLeft="20dp"
+        android:background="@drawable/search"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/et"
+        android:id="@+id/tv"
+        android:layout_marginTop="30dp"
+        android:textSize="24sp"
+        android:layout_marginLeft="30dp"/>
+
+</RelativeLayout>
