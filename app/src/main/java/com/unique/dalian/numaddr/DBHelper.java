@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Environment;
+import android.util.Log;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -27,54 +28,65 @@ public class DBHelper {
     }
 
     /**
-    public void createDatabase() {
-        try {
-            File file = new File(DB_PATH + "/" + DB_NAME);
-            file.createNewFile();
-            FileOutputStream fos = new FileOutputStream(file);
-
-            InputStream is = context.getResources().openRawResource(R.raw.numaddr);
-            int hasRead = 0;
-            byte[] buf = new byte[1024 * 10];
-            while((hasRead = is.read(buf)) > 0) {
-                fos.write(buf, 0, hasRead);
-            }
-            fos.flush();
-            fos.close();
-            is.close();
-        }  catch(FileNotFoundException e) {
-            e.printStackTrace();
-        } catch(IOException e) {
-            e.printStackTrace();
-        }
-
-    } **/
+     * public void createDatabase() {
+     * try {
+     * File file = new File(DB_PATH + "/" + DB_NAME);
+     * file.createNewFile();
+     * FileOutputStream fos = new FileOutputStream(file);
+     * <p/>
+     * InputStream is = context.getResources().openRawResource(R.raw.numaddr);
+     * int hasRead = 0;
+     * byte[] buf = new byte[1024 * 10];
+     * while((hasRead = is.read(buf)) > 0) {
+     * fos.write(buf, 0, hasRead);
+     * }
+     * fos.flush();
+     * fos.close();
+     * is.close();
+     * }  catch(FileNotFoundException e) {
+     * e.printStackTrace();
+     * } catch(IOException e) {
+     * e.printStackTrace();
+     * }
+     * <p/>
+     * } *
+     */
 
     public static String getNumberAddr(String phoneNumber) {
         String key;
         String sql;
         String addr = "Unknown Area";
+        SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(DB_PATH + "/" + DB_NAME, null);
+
         if (phoneNumber.startsWith("1") && phoneNumber.length() >= 7) {
             key = phoneNumber.substring(0, 7);
             sql = "select MobileArea from Dm_Mobile where MobileNumber = '" + key + "'";
         } else if (phoneNumber.startsWith("0") && phoneNumber.length() >= 3) {
-            key = phoneNumber.substring(0, 3);
-            sql = "select MobileArea, AreaCode from Dm_Mobile where AreaCode like '" + key + "%'";
+            if (phoneNumber.length() == 3) {
+                key = phoneNumber.substring(0, 3);
+                sql = "select MobileArea from Dm_Mobile where AreaCode = '" + key + "'";
+            } else {
+                key = phoneNumber.substring(0, 4);
+                sql = "select MobileArea from Dm_Mobile where AreaCode = '" + key + "'";
+            }
+
         } else {
             return addr;
         }
-        SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(DB_PATH + "/" + DB_NAME, null);
+
         Cursor cursor = db.rawQuery(sql, null);
-        if (cursor.getCount() == 1) {
+        if (cursor.getCount() > 0) {
             cursor.moveToNext();
             addr = cursor.getString(cursor.getColumnIndex("MobileArea"));
-        } else if (cursor.getCount() > 1) {
-            key = phoneNumber.substring(0, 4);
-            while (cursor.moveToNext()) {
-                if (cursor.getString(cursor.getColumnIndex("AreaCode")).equals(key)) {
-                    addr = cursor.getString(cursor.getColumnIndex("MobileArea"));
-                    break;
-                }
+        } else if (phoneNumber.startsWith("0") && phoneNumber.length() > 3) {
+            //AreaCode length is 3
+            key = phoneNumber.substring(0, 3);
+            sql = "select MobileArea from Dm_Mobile where AreaCode = '" + key + "'";
+            Cursor c3 = db.rawQuery(sql, null);
+            if (c3.getCount() > 0) {
+                c3.moveToNext();
+                addr = c3.getString(c3.getColumnIndex("MobileArea"));
+                c3.close();
             }
         }
         cursor.close();
